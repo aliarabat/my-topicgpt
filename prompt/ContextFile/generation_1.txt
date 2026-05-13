@@ -1,0 +1,90 @@
+You will receive an instruction file (e.g., AGENTS.md) that guides the coding agents in navigating different resources of a software project and a set of top-level topics from a topic hierarchy. Your task is to identify GENERALIZABLE and HIGH-LEVEL topics defined in the this instruction file. Prefer abstract topics that are related to software engineering practices (for example running tests, best coding practices, security guidelines). If a relevant topic already exists, return the existing topic. If it is missing, add a new high-level topic.
+
+[Top-level topics]
+{Topics}
+
+[Examples]
+Example 1: Adding a new topic
+Document: 
+## Repository Structure
+
+```
+libaaruformat/
+├── include/           # Public and internal headers
+│   ├── aaru.h         # Main public API header
+│   ├── aaruformat.h   # Format-specific public header
+│   └── aaruformat/    # Detailed headers (structs, enums, etc.)
+├── src/               # Source files
+│   ├── blocks/        # Block-level read/write operations
+│   ├── checksum/      # Checksum implementations (MD5, SHA1, SHA256, SpamSum)
+│   ├── compression/   # Compression (LZMA, FLAC, CST)
+│   ├── crc64/         # CRC64 with SIMD optimizations
+│   ├── ddt/           # Deduplication table handling
+│   └── index/         # Index structures for V1/V2/V3
+├── tests/             # Unit tests using Google Test
+├── tool/              # Command-line tool (aaruformattool)
+├── 3rdparty/          # Third-party dependencies (BLAKE3, FLAC, LZMA, xxHash, uthash)
+├── docs/              # Documentation and format specification
+└── runtimes/          # Pre-built binaries for NuGet package
+```
+
+Your response: 
+[1] Project Structure: The context file provides a comprehensive overview of the repository tree, including all folders, subfolders, and associated files.
+
+Example 2: Returning the existing topic
+Document:
+## Development Commands
+
+### Building and Development
+
+- `npm run watch_lib` - Build the library with Rollup in watch mode
+- `npm run watch_games` - Start development server for games on localhost:4000
+- `npm run generate_reference` - Generate API documentation with TypeDoc
+- `npm run test` - Run automated tests (Vitest)
+- `npm run test:watch` - Run tests in watch mode
+
+### TODO Items
+
+**TODO items are not allowed in submitted code.**
+
+If you need a TODO, the implementation is incomplete. Either:
+1. Complete the implementation
+2. Don't submit it yet
+3. Create a separate issue tracking the future work
+
+```rust
+// Forbidden
+fn process() {
+    // TODO: handle edge case
+}
+
+// Forbidden
+fn process() {
+    unimplemented!("will add later")
+}
+```
+
+Your response: 
+[1] Building and Testing: The context file outlines the necessary commands and descriptions for building and verifying the project.
+[1] Coding Best Practices: The context file details specific anti-patterns to avoid and provides guidance on adhering to established coding standards.
+
+[Instructions]
+Step 1: Determine primary topics mentioned in the context file. 
+- Topics must be broad and reusable across many context files.
+- Each topic must represent a SINGLE software engineering topic instead of a combination of topics.
+- Avoid document-specific details (function names, framework names, design patterns)
+- Prefer framing by uderlying instruction quality, not by one specific tool feature.
+- The new topics must have a level number, a short general label, and a concise topic description. 
+
+Step 2: Perform ONE of the following operations: 
+1. If a duplicate or clearly relevant topic already exists in the hierarchy, output that existing topic and stop.
+2. If the document has no meaningful Prometheus challenge topic, return "None".
+3. Otherwise, add a new top-level topic and stop. DO NOT add additional hierarchy levels.
+
+[Document]
+{Document}
+
+Please ONLY return relevant or modified top-level topics.
+[Topic Level] Topic Label: Topic Description (phrase it as a quality attribute that software developers/operators may consider)
+
+Your response:

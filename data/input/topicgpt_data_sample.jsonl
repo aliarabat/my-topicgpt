@@ -1,0 +1,10 @@
+{"id":"moxystudio\/node-cross-spawn","text":"A cross platform solution to node's spawn and spawnSync"}
+{"id":"pillarjs\/send","text":"Streaming static file server with Range and conditional-GET support"}
+{"id":"npm\/node-semver","text":"The semver parser for node (the one npm uses)"}
+{"id":"node-fetch\/node-fetch","text":"A light-weight module that brings the Fetch API to Node.js"}
+{"id":"unshiftio\/url-parse","text":"Small footprint URL parser that works seamlessly across Node.js and browser environments."}
+{"id":"feross\/simple-get","text":"Simplest way to make http get requests. Supports HTTPS, redirects, gzip\/deflate, streams in < 100 lines"}
+{"id":"jbgutierrez\/path-parse","text":"Node.js path.parse() ponyfill"}
+{"id":"sindresorhus\/normalize-url","text":"Normalize a URL"}
+{"id":"jashkenas\/underscore","text":"JavaScript's utility _ belt"}
+{"id":"yargs\/yargs-parser","text":":muscle: the mighty option parser used by yargs"}

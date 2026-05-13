@@ -1,0 +1,145 @@
+You will receive a agent instruction-related document and a topic hierarchy. Assign the document to the most relevant topic(s) in the hierarchy based on the underlying HIGH-LEVEL software engineering practice. Then output the topic label(s), concise reasoning, and supporting quote(s) from the document. DO NOT invent topics or quotes.
+
+[Topic Hierarchy]
+{tree}
+
+[Examples]
+Example 1: Assign "[1] Extensible Component Architecture" to the document
+Document: 
+### Generic Client Architecture
+
+The client system uses a generic architecture with provider extensions:
+
+```rust
+pub struct Client<Ext = Nothing, H = reqwest::Client> {
+    // ...
+}
+```
+
+Where `Ext` is a provider extension defining capabilities and `H` is the HTTP backend.
+
+### Capability-Based Providers
+
+Providers declare their capabilities explicitly:
+
+```rust
+impl<H> Capabilities<H> for MyProviderExt {
+    type Completion = Capable<CompletionModel<H>>;  // Supported
+    type Embeddings = Nothing;                       // Not supported
+    // ...
+}
+```
+
+Use `Capable<T>` for supported features and `Nothing` for unsupported ones.
+
+## rig-provider-implementation
+
+Reference implementation: `rig-core/src/providers/openai/` (Chat Completions API)
+
+When implementing a new provider, study the OpenAI Chat Completions implementation thoroughly. It demonstrates the complete pattern including both completion and embedding models.
+
+### Required Components
+
+1. **Provider Extension and Builder Structs**
+   ```rust
+   #[derive(Debug, Default, Clone, Copy)]
+   pub struct MyProviderExt;
+
+   #[derive(Debug, Default, Clone, Copy)]
+   pub struct MyProviderBuilder;
+   ```
+
+2. **Provider Trait Implementation**
+   ```rust
+   impl Provider for MyProviderExt {
+       type Builder = MyProviderBuilder;
+       const VERIFY_PATH: &'static str = "/models";  // Health check endpoint
+
+       fn build<H>(...) -> http_client::Result<Self> {
+           Ok(Self)
+       }
+   }
+   ```
+
+Assignment:
+[1] Extensible Component Architecture: Uses generic types and trait-based extensions to create a "plug-and-play" system that decouples core client logic from specific provider capabilities.
+
+Example 2: Assign "[1] Policy Compliance" to the document
+Document: 
+## Before Submitting
+
+### Required Checks
+
+Run these commands and fix all issues before submitting:
+
+```bash
+cargo fmt
+cargo clippy --all-targets --all-features
+cargo test
+```
+
+If you cannot run these commands (e.g., environment limitations), explicitly ask the user to run them before the PR is submitted.
+
+### Architectural Changes
+
+If your change involves:
+- New traits or significant trait modifications
+- Changes to the client/provider architecture
+- New abstractions or patterns
+- Breaking changes to public APIs
+
+**Discuss with the user first.** Do not implement major architectural changes without explicit approval. Open an issue for discussion if needed.
+
+### Self-Review Checklist
+
+Before considering code complete:
+
+- [ ] All error cases handled properly (no `.unwrap()` or `.expect()` on fallible operations unless truly impossible)
+- [ ] No `String` error types
+- [ ] No TODO comments
+- [ ] No stubbed implementations
+- [ ] Comments explain "why", not "what"
+- [ ] Uses `WasmCompatSend`/`WasmCompatSync` instead of `Send`/`Sync`
+- [ ] Follows existing code patterns in the codebase
+- [ ] Includes tests or examples that compile
+- [ ] `cargo fmt` passes
+- [ ] `cargo clippy --all-targets --all-features` passes
+- [ ] `cargo test` passes
+
+Assignment: 
+[1] Policy Compliance: The instruction enforces specific "Self-Review" quality standards and adherence to the project's internal coding policies. ("Self-Review Checklist").
+
+Example 3: Assign "[1] Project Navigation" to the document
+Document:
+## WHERE TO LOOK
+
+| Task | Location | Notes |
+|------|----------|-------|
+| Add new UI widget | `src/ui/widgets/` + `data/resources/ui/` | Create both .rs and .ui file, add to mod.rs |
+| Add new data model | `src/models/` | Follow GObject subclass pattern (see AGENTS.md there) |
+| Modify download logic | `src/ui/widgets/download_manager/` | Asset trait on EpicDownloadManager |
+| Handle new message type | `src/ui/messages.rs` + `src/ui/update.rs` | Add variant to Msg enum, handle in update() |
+| Change auth flow | `src/ui/authentication.rs` + `src/window.rs` | SID code → API token → show_logged_in() |
+| Add database table | `migrations/` + `src/schema.rs` | `diesel migration generate`, schema auto-generated |
+| Modify build | `meson.build` + `src/meson.build` | Meson orchestrates, Cargo compiles Rust |
+| Add Flatpak permission | `build-aux/*.json` | Both Devel and Release manifests |
+| Change app settings | `src/ui/widgets/preferences/mod.rs` | Uses gio::Settings + Secret Service |
+
+Assignment: 
+[1] Project Navigation: Presents a guide that maps specific development tasks to their corresponding directory paths and architectural layers within a repository. ("## WHERE TO LOOK").
+
+[Instructions]
+1. Every assigned topic label MUST exist in the provided hierarchy. You MUST NOT make up new topics. 
+2. Every quote MUST be copied from the document text. You MUST NOT make up quotes. 
+3. Prefer the most specific matching topic level available.
+4. If no topic in the hierarchy is relevant, return "None".
+5. In reasoning, describe the core agent instruction quality (for example preject navigation, running tests, security guidelines), not just the surface request.
+
+[Document]
+{Document}
+
+Double check that your assignment exists in the hierarchy!
+Your response should be in the following format:
+[Topic Level] Topic Label: Assignment reasoning (Supporting quote)
+
+Your response:

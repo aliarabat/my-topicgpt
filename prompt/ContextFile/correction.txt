@@ -1,0 +1,62 @@
+You will receive a agent instruction-related document and a topic hierarchy. Assign the document to the most relevant topics the hierarchy. Then, output the topic labels, assignment reasoning and supporting quotes from the document. DO NOT make up new topics or quotes.  
+
+[Topic Hierarchy]
+{tree}
+
+[Examples]
+Example 1
+Document: 
+## Commands
+
+### Build
+```bash
+npm run build              # Build all (chat, core, react)
+npm run build:chat         # Main chat bundle
+npm run build:core         # Core SDK (no React)
+npm run build:react        # React bindings
+```
+
+### Test
+```bash
+npm test                   # All tests with coverage
+npm run test:chat          # Core tests only (vitest project: "chat")
+npm run test:react         # React tests only (vitest project: "react-hooks")
+npm run test:unit          # All tests excluding integration
+npm run test:chat-unit     # Core unit tests only
+npm run test:react-unit    # React unit tests only
+npm run test:typescript    # Type-check only (no tests)
+npm run test:watch         # Watch mode
+
+Assignment:
+[1] Build and Test Orchestration: Focuses on providing granular control over the development lifecycle ("To verify just the React components without running the full suite, use `npm run test:react-unit`")
+
+Example 2
+Document: 
+### Critical Dependencies
+
+- `dayjs` - Date manipulation (with plugins: duration, isBetween, isoWeek)
+- `calendarize` - Calendar date generation
+- `react-native-gesture-handler` - Touch gesture handling
+- `react-native-infinite-pager` - Swipe navigation between dates
+- `react-native-reanimated` - Smooth animations
+
+Assignment: 
+[1] Core Dependency Infrastructure: focuses on documenting the "Strategic Dependencies" required for core operations—such as date processing, gesture interaction, and UI performance ("### Critical Dependencies")
+
+[Instructions]
+1. Assigned topic labels MUST exist in the provided hierarchy.
+2. Supporting quotes MUST appear in the document.
+3. Remove hallucinated topics, malformed entries, or unsupported claims.
+4. Keep only relevant assignments.
+5. If no valid assignment is possible, return "None".
+6. Prioritize agent guidance-level framing in reasoning (for example navigating project tree, running unit test, ensuring CI pipeline pass).
+
+
+[Document]
+{Document}
+
+{Message} Double check that your assignment exists in the hierarchy!
+Your response format:
+[Topic Level] Topic Label: Assignment reasoning (Supporting quote)
+
+Your response:

@@ -1,0 +1,4 @@
+[1] Monorepo Lifecycle Orchestration: Manages workspace dependencies and parallel task execution using Yarn 4 and Lage to ensure efficient, root-level operations.
+[1] AI-Augmented Version Control Governance: Enforces mandatory [AI] prefixes and Git safety protocols to align agentic contributions with the project's automated workflow.
+[1] Cross-Platform Architectural Decoupling: Separates core business logic in loot-core from environment-specific code to maintain a strictly platform-agnostic architecture.
+[1] Multi-Tiered Quality Verification: Combines unit, E2E, and visual regression testing with mandatory type-checking to verify stability across all workspaces.
