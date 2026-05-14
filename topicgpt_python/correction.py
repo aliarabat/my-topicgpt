@@ -67,7 +67,7 @@ def correct(
     reprompt_idx,
     temperature=1.0,
     top_p=1.0,
-    max_tokens=300,
+    max_tokens=1500,
     verbose=False,
 ):
     """Return documents with assigned topics based on relevance."""
@@ -200,7 +200,7 @@ def correct_topics(
     - verbose: Print verbose output
     """
     api_client = APIClient(api=api, model=model)
-    max_tokens, temperature, top_p = 64000, 1.0, 0.9
+    max_tokens, temperature, top_p = 1500, 1.0, 0.9
     context_len = (
         128000
         if model not in ["gpt-3.5-turbo", "gpt-4"]

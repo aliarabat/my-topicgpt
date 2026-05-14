@@ -71,10 +71,10 @@ Your response:
 [Instructions]
 Step 1: Determine primary topics mentioned in the context file. 
 - Topics must be broad and reusable across many context files.
-- Each topic must represent a SINGLE software engineering topic instead of a combination of topics.
+- Each topic must represent a SINGLE software engineering topic instead of a combination of topics or slashes ("/").
 - Avoid document-specific details (function names, framework names, design patterns)
 - Prefer framing by uderlying instruction quality, not by one specific tool feature.
-- The new topics must have a level number, a short general label, and a concise topic description. 
+- The new topics must have a level number, a short general label, and a concise topic description.
 
 Step 2: Perform ONE of the following operations: 
 1. If a duplicate or clearly relevant topic already exists in the hierarchy, output that existing topic and stop.
@@ -85,6 +85,7 @@ Step 2: Perform ONE of the following operations:
 {Document}
 
 Please ONLY return relevant or modified top-level topics.
-[Topic Level] Topic Label: Topic Description (phrase it as a quality attribute that software developers/operators may consider)
+[<LEVEL>] <TOPIC_LABEL>:<TOPIC_DESCRIPTION> (phrase it as a quality attribute that software developers/operators may consider).
+...
 
 Your response:

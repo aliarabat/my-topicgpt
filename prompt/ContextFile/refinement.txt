@@ -27,7 +27,8 @@ Your response:
 - If no reliable merge is possible, output exactly "None".
 
 When merging, use this format:
-[Topic Level] Updated Topic Label: Updated description (Original topic 1, Original topic 2)
+[<LEVEL>] UPDATED_TOPIC_LABEL: <UPDATED_DESCRIPTION> (Original topic 1, Original topic 2)
+...
 
 [Topic List]
 {Topics}

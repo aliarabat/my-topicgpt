@@ -20,6 +20,7 @@ generation:
   seed: "prompt/ContextFile/seed_1.md"      
   output: "data/output/ContextFile/generation_1.jsonl"
   topic_output: "data/output/ContextFile/generation_1.md"
+  versbose: True
 
 # --- Refinement ---
 # refining_topics: whether to refine topics or not

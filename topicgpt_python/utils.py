@@ -8,8 +8,16 @@ import traceback
 import subprocess
 
 from openai import OpenAI, AzureOpenAI
+try:
+    from litellm import completion as litellm_completion
+except ModuleNotFoundError:
+    litellm_completion = None
 import tiktoken
-from vllm import LLM, SamplingParams
+try:
+    from vllm import LLM, SamplingParams
+except ModuleNotFoundError:
+    LLM = None
+    SamplingParams = None
 import vertexai
 from vertexai.generative_models import (
     GenerationConfig,
@@ -25,16 +33,13 @@ from google.generativeai.types import HarmCategory, HarmBlockThreshold
 from sklearn import metrics
 import numpy as np
 
-from topicgpt_python.log_config import get_logger
-
-logger = get_logger()
 
 class APIClient:
     """
-    Prompting for OpenAI, VertexAI, and vLLM.
+    Prompting for OpenAI, VertexAI, vLLM, and Github Copilot via LiteLLM.
 
     Parameters:
-    - api: API type (e.g., 'openai', 'vertex', 'vllm')
+    - api: API type (e.g., 'openai', 'vertex', 'vllm', 'github_copilot')
     - model: Model name
 
     Methods:
@@ -61,10 +66,14 @@ class APIClient:
                 self.model_obj = genai.GenerativeModel(self.model)
         elif api == "ollama": 
             self.client = OpenAI(
-                base_url = 'http://localhost:11434/v1',
-                api_key='ollama', # required, but unused
+                base_url = 'http://localhost:11431/v1',
+                api_key='ollama', # required, but unused,
             )
         elif api == "vllm":
+            if LLM is None:
+                raise ModuleNotFoundError(
+                    "vllm is not installed. Install vllm to use api='vllm'."
+                )
             self.hf_token = os.environ.get("HF_TOKEN")
             self.llm = LLM(
                 self.model,
@@ -80,6 +89,18 @@ class APIClient:
             api_version = "2024-02-01",
             azure_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
             )
+        elif api == "github_copilot":
+            if litellm_completion is None:
+                raise ModuleNotFoundError(
+                    "litellm is required for api='github_copilot'. "
+                    "Install it with: pip install litellm"
+                )
+            self.copilot_api_key = (
+                os.getenv("GITHUB_COPILOT_API_KEY")
+                or os.getenv("GITHUB_TOKEN")
+                or os.getenv("GH_TOKEN")
+            )
+            self.copilot_api_base = os.getenv("GITHUB_COPILOT_API_BASE")
         else:
             raise ValueError(
                 f"API {api} not supported. Custom implementation required."
@@ -117,7 +138,7 @@ class APIClient:
         try:
             enc = tiktoken.encoding_for_model(self.model)
         except KeyError:
-            logger.info("Warning: model not found. Using o200k_base encoding.")
+            print("Warning: model not found. Using o200k_base encoding.")
             enc = tiktoken.get_encoding("o200k_base")
 
         tokens = enc.encode(document)
@@ -158,18 +179,42 @@ class APIClient:
 
         for attempt in range(num_try):
             try:
+                
                 if self.api in ["openai", "azure", "ollama"]:
-                    completion = self.client.chat.completions.create(
-                        model=self.model,
-                        messages=message,
-                        max_completion_tokens=max_tokens,
-                        temperature=temperature,
-                        top_p=top_p,
-                    )
+                    request_kwargs = {
+                        "model": self.model,
+                        "messages": message,
+                    }
+               
+                    # --- OLLAMA FIX START ---
+                    # Ollama defaults to 2048. We use extra_body to pass num_ctx 
+                    # through the OpenAI-compatible client.
+                    if self.api == "ollama":
+                        request_kwargs["extra_body"] = {"num_ctx": 4096} 
+                    # --- OLLAMA FIX END ---
+               
+                    # GPT-5 family currently supports default sampling only on this endpoint.
+                    if not self.model.startswith("gpt-5"):
+                        request_kwargs["temperature"] = temperature
+                        request_kwargs["top_p"] = top_p
+                    # Newer GPT-5 family models use max_completion_tokens.
+                    if self.model.startswith("gpt-5"):
+                        request_kwargs["max_completion_tokens"] = max_tokens
+                    else:
+                        request_kwargs["max_tokens"] = max_tokens
+
+                    completion = self.client.chat.completions.create(**request_kwargs)
                     if verbose:
-                        logger.info(f"Prompt token usage: {completion.usage.prompt_tokens} ~${completion.usage.prompt_tokens/1000000*5}")
-                        logger.info(
-                            f"Response token usage: {completion.usage.completion_tokens} ~${completion.usage.completion_tokens/1000000*15}")
+                        print(
+                            "Prompt token usage:",
+                            completion.usage.prompt_tokens,
+                            f"~${completion.usage.prompt_tokens/1000000*5}",
+                        )
+                        print(
+                            "Response token usage:",
+                            completion.usage.completion_tokens,
+                            f"~${completion.usage.completion_tokens/1000000*15}",
+                        )
                     return completion.choices[0].message.content
 
                 elif self.api == "vertex":
@@ -180,7 +225,7 @@ class APIClient:
                         )
                         message = client.messages.create(
                             model=self.model,
-                            max_completion_tokens=max_tokens,
+                            max_tokens=max_tokens,
                             temperature=temperature,
                             system=system_message,
                             messages=[message[1]],
@@ -189,8 +234,16 @@ class APIClient:
                         message_dict = json.loads(message_json_str)
                         text_content = message_dict["content"][0]["text"]
                         if verbose:
-                            logger.info(f"Prompt usage: {message_dict['usage']['input_tokens']} ${message_dict['usage']['input_tokens']/1000000*3}")
-                            logger.info(f"Prompt usage: {message_dict['usage']['output_tokens']} ${message_dict['usage']['output_tokens']/1000000*15}")
+                            print(
+                                "Prompt usage:",
+                                message_dict["usage"]["input_tokens"],
+                                f"${message_dict['usage']['input_tokens']/1000000*3}",
+                            )
+                            print(
+                                "Prompt usage:",
+                                message_dict["usage"]["output_tokens"],
+                                f"${message_dict['usage']['output_tokens']/1000000*15}",
+                            )
                         return text_content
                     else:
                         config = GenerationConfig(
@@ -235,7 +288,7 @@ class APIClient:
                     sampling_params = SamplingParams(
                         temperature=temperature,
                         top_p=top_p,
-                        max_completion_tokens=max_tokens,
+                        max_tokens=max_tokens,
                         stop_token_ids=[
                             self.tokenizer.eos_token_id,
                             self.tokenizer.convert_tokens_to_ids("<|eot_id|>"),
@@ -276,8 +329,29 @@ class APIClient:
                         traceback.print_exc()
                         time.sleep(60)
 
+                elif self.api == "github_copilot":
+                    copilot_model = (
+                        self.model
+                        if "/" in self.model
+                        else f"github_copilot/{self.model}"
+                    )
+                    kwargs = {
+                        "model": copilot_model,
+                        "messages": message,
+                        "max_tokens": max_tokens,
+                    }
+                    if self.copilot_api_key:
+                        kwargs["api_key"] = self.copilot_api_key
+                    if self.copilot_api_base:
+                        kwargs["api_base"] = self.copilot_api_base
+
+                    response = litellm_completion(**kwargs)
+                    if isinstance(response, dict):
+                        return response["choices"][0]["message"]["content"]
+                    return response.choices[0].message.content
+
             except Exception as e:
-                logger.info(f"Attempt {attempt + 1}/{num_try} failed: {e}")
+                print(f"Attempt {attempt + 1}/{num_try} failed: {e}")
                 if attempt < num_try - 1:
                     time.sleep(60)  # avoid rate limiting issues
                 else:
@@ -310,7 +384,7 @@ class APIClient:
         sampling_params = SamplingParams(
             temperature=temperature,
             top_p=top_p,
-            max_completion_tokens=max_tokens,
+            max_tokens=max_tokens,
             stop_token_ids=[
                 self.tokenizer.eos_token_id,
                 self.tokenizer.convert_tokens_to_ids("<|eot_id|>"),
@@ -414,8 +488,8 @@ class TopicTree:
                     match.group(4).strip() if match.group(4) else "",
                 )
             except:
-                logger.info(match)
-                logger.info(f"Error reading {topic}")
+                print(match)
+                print("Error reading", topic)
                 traceback.print_exc()
 
             tree._add_node(lvl, label, count, desc, tree.level_nodes.get(lvl - 1))
@@ -447,8 +521,8 @@ class TopicTree:
                     match.group(2).strip(),
                 )
             except:
-                logger.info(match)
-                logger.info(f"Error reading {topic}")
+                print(match)
+                print("Error reading", topic)
                 traceback.print_exc()
 
             tree._add_node(lvl, label, 1, "", tree.level_nodes.get(lvl - 1))
