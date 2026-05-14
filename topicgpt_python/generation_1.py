@@ -48,7 +48,7 @@ def prompt_formatting(
             if verbose:
                 logger.info(f"Document is too long ({doc_len} tokens). Truncating...")
             doc = api_client.truncating(doc, context_len - prompt_len - max_top_len)
-            prompt = generation_prompt.format(Document=doc, Topics=topic_str)
+            prompt = generation_prompt.replace("{Document}", doc).replace("{Topics}", topic_str)
         else:  # Truncate topic list
             if verbose:
                 logger.info(f"Too many topics ({topic_len} tokens). Pruning...")
@@ -72,9 +72,9 @@ def prompt_formatting(
                 else:
                     seed_str += new_seed + "\n"
                     seed_len += api_client.estimate_token_count(seed_str)
-            prompt = generation_prompt.format(Document=doc, Topics=seed_str)
+            prompt = generation_prompt.replace("{Document}", doc).replace("{Topics}", seed_str)
     else:
-        prompt = generation_prompt.format(Document=doc, Topics=topic_str)
+        prompt = generation_prompt.replace("{Document}", doc).replace("{Topics}", topic_str)
     return prompt
 
 

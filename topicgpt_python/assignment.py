@@ -91,7 +91,7 @@ def assignment(
             doc = api_client.truncating(doc, max_doc_len)
 
         try:
-            prompt = assignment_prompt.format(Document=doc, tree=seed_str)
+            prompt = assignment_prompt.replace("{Document}", doc).replace("{tree}", seed_str)
             response = api_client.iterative_prompt(
                 prompt, max_tokens, temperature, top_p=top_p, verbose=verbose
             )
@@ -179,7 +179,7 @@ def assignment_batch(
                 f"Truncating document from {api_client.estimate_token_count(doc)} to {max_doc_len}"
             )
             doc = api_client.truncating(doc, max_doc_len)
-        prompt = assignment_prompt.format(Document=doc, tree=seed_str)
+        prompt = assignment_prompt.replace("{Document}", doc).replace("{tree}", seed_str)
         prompts.append(prompt)
         prompted_docs.append(doc)
 

@@ -210,7 +210,7 @@ def generate_topics(
 
         for doc in doc_prompt:
             try:
-                prompt = gen_prompt.format(Topic=current_topic, Document=doc)
+                prompt = gen_prompt.replace("{Document}", doc).replace("{Topics}", current_topic)
                 result = api_client.iterative_prompt(
                     prompt,
                     max_tokens,

@@ -100,7 +100,7 @@ def merge_topics(
     pattern_original = regex.compile(r"\[(\d+)\]([\w\s\-',]+),?")
 
     while len(new_pairs) > 1:
-        refiner_prompt = refinement_prompt.format(Topics="\n".join(new_pairs))
+        refiner_prompt = refinement_prompt.replace("{Topics}", "\n".join(new_pairs))
         if verbose:
             logger.info(f"Prompting model to merge topics:\n{refiner_prompt}")
 

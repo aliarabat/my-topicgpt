@@ -106,9 +106,8 @@ def correct(
 
         try:
             msg = f"Previously, this document was assigned to: {df.at[i, 'responses']}. Please reassign it to an existing topic in the hierarchy."
-            prompt = correction_prompt.format(
-                Document=doc, tree=all_topics, Message=msg
-            )
+            prompt = correction_prompt.replace("{Document}", doc).replace("{tree}", all_topics).replace("{Message}", msg)
+            
             result = api_client.iterative_prompt(
                 prompt, max_tokens=max_tokens, temperature=temperature, top_p=top_p
             )
@@ -170,7 +169,7 @@ def correct_batch(
             if api_client.estimate_token_count(doc) > max_doc_len:
                 doc = api_client.truncate(doc, max_doc_len)
         msg = f"Previously, this document was assigned to: {df.at[i, 'responses']}. Please reassign it to an existing topic in the hierarchy."
-        prompt = correction_prompt.format(Document=doc, tree=all_topics, Message=msg)
+        prompt = correction_prompt.replace("{Document}", doc).replace("{tree}", all_topics).replace("{Message}", msg)
         prompts.append(prompt)
 
     responses = api_client.batch_prompt(

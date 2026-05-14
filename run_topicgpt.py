@@ -6,7 +6,7 @@ from topicgpt_python.log_config import get_logger
 logger = get_logger()
 
 
-PROVIDER = 'github_copilot'
+PROVIDER = 'openai'
 MODEL = 'gpt-5-mini'
 # PROVIDER = 'ollama'
 # MODEL = 'gemma3'
