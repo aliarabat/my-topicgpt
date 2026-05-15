@@ -8,6 +8,10 @@ import argparse
 import os
 from anytree import Node, RenderTree
 
+from topicgpt_python.log_config import get_logger
+
+logger = get_logger()
+
 # Set environment variables
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 sbert = SentenceTransformer("all-MiniLM-L6-v2")
@@ -42,12 +46,12 @@ def prompt_formatting(
     if total_len > context_len:
         if doc_len > (context_len - prompt_len - max_top_len):  # Truncate document
             if verbose:
-                print(f"Document is too long ({doc_len} tokens). Truncating...")
+                logger.info(f"Document is too long ({doc_len} tokens). Truncating...")
             doc = api_client.truncating(doc, context_len - prompt_len - max_top_len)
             prompt = generation_prompt.replace("{Document}", doc).replace("{Topics}", topic_str)
         else:  # Truncate topic list
             if verbose:
-                print(f"Too many topics ({topic_len} tokens). Pruning...")
+                logger.info(f"Too many topics ({topic_len} tokens). Pruning...")
             cos_sim = {}
             doc_emb = sbert.encode(doc, convert_to_tensor=True)
             for top in topics_list:
@@ -128,13 +132,13 @@ def generate_topics(
                     t = t.lstrip("- ").strip()
 
                 if not regex.match(topic_format, t):
-                    print(f"Invalid topic format: {t}. Skipping...")
+                    logger.info(f"Invalid topic format: {t}. Skipping...")
                     continue
                 groups = regex.match(topic_format, t)
                 lvl, name, desc = int(groups[1]), groups[2].strip(), groups[3].strip()
 
                 if lvl != 1:
-                    print(f"Lower level topics are not allowed: {t}. Skipping...")
+                    logger.info(f"Lower level topics are not allowed: {t}. Skipping...")
                     continue
                 dups = topics_root.find_duplicates(name, lvl)
 
@@ -151,8 +155,8 @@ def generate_topics(
                     running_dups = 0
 
             if verbose:
-                print(f"Topics: {response}")
-                print("--------------------")
+                logger.info(f"Topics: {response}")
+                logger.info("--------------------")
             responses.append(response)
 
         except Exception as e:
@@ -186,15 +190,15 @@ def generate_topic_lvl1(
     max_tokens, temperature, top_p = 1500, 0.0, 1.0
 
     if verbose:
-        print("-------------------")
-        print("Initializing topic generation...")
-        print(f"Model: {model}")
-        print(f"Data file: {data}")
-        print(f"Prompt file: {prompt_file}")
-        print(f"Seed file: {seed_file}")
-        print(f"Output file: {out_file}")
-        print(f"Topic file: {topic_file}")
-        print("-------------------")
+        logger.info("-------------------")
+        logger.info("Initializing topic generation...")
+        logger.info(f"Model: {model}")
+        logger.info(f"Data file: {data}")
+        logger.info(f"Prompt file: {prompt_file}")
+        logger.info(f"Seed file: {seed_file}")
+        logger.info(f"Output file: {out_file}")
+        logger.info(f"Topic file: {topic_file}")
+        logger.info("-------------------")
 
     # Model configuration
     context = (

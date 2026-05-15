@@ -7,7 +7,7 @@ verbose: True
 # data_sample: input file (.jsonl format)
 # content: each file should have a text, and optionally id and label columns
 # ----------------- 
-data_sample: "data/input/context_files_first_versions.jsonl"
+data_sample: "data/input/context_files_all_versions.jsonl"
 
 # --- Generation ---
 # prompt: prompt to generate 1st-level topics
@@ -35,7 +35,8 @@ refinement:
   output: "data/output/ContextFile/refinement.jsonl"
   topic_output: "data/output/ContextFile/refinement.md"
   mapping_file: "data/output/ContextFile/refinement_mapping.json"
-  remove: True      
+  remove: True
+  versbose: True
 
 # --- Subtopic Generation ---
 # generate_subtopics: whether to generate subtopics or not
@@ -48,6 +49,7 @@ generation_2:
   prompt: "prompt/ContextFile/generation_2.txt"
   output: "data/output/generation_2.jsonl"
   topic_output: "data/output/generation_2.md"
+  versbose: True
 
 # --- Assignment ---
 # prompt: prompt to assign topics to documents
@@ -56,6 +58,7 @@ generation_2:
 assignment:
   prompt: "prompt/ContextFile/assignment.txt"
   output: "data/output/ContextFile/assignment.jsonl"
+  versbose: True
 
 # --- Correction ---
 # prompt: prompt to correct topics
@@ -64,3 +67,4 @@ assignment:
 correction:
   prompt: "prompt/ContextFile/correction.txt"
   output: "data/output/ContextFile/assignment_corrected.jsonl"
+  versbose: True
